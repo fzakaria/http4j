@@ -27,3 +27,9 @@ public class ServerWithSimpleRouter {
   }
 }
 ```
+## TODO
+1. Client interface will be the same as HttpHandler but should have several implementations
+2. In-Memory server & client
+3. Additional server creators
+4. More tests
+5. Github CICD
