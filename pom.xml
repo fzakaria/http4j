@@ -21,8 +21,10 @@
 
     <modules>
         <module>core</module>
-        <module>jdk-server</module>
+        <module>servers</module>
         <module>examples</module>
+        <module>clients</module>
+        <module>core-test</module>
     </modules>
 
     <dependencyManagement>

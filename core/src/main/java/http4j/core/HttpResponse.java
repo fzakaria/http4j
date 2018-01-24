@@ -19,7 +19,7 @@ public final class HttpResponse extends HttpMessage {
   private final ByteBuffer buffer;
   private final int status;
 
-  private HttpResponse(int status, ByteBuffer buffer, Multimap<String, String> headers) {
+  public HttpResponse(int status, ByteBuffer buffer, Multimap<String, String> headers) {
     super(headers);
     this.buffer = buffer;
     this.status = status;

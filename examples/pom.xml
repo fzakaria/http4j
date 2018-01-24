@@ -9,19 +9,19 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>http4j-examples</artifactId>
+    <artifactId>examples</artifactId>
     <name>http4j Examples</name>
     <description>Code examples on how to use http4j</description>
 
     <dependencies>
         <dependency>
             <groupId>http4j</groupId>
-            <artifactId>http4j-jdk-server</artifactId>
+            <artifactId>jdk-server</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>http4j</groupId>
-            <artifactId>http4j-core</artifactId>
+            <artifactId>core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

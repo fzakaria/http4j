@@ -49,7 +49,7 @@ public final class SunHttpServerCreator implements HttpServerCreator {
 
     @Override
     public void start() {
-      LOG.info("Starting FuncServer on port {}", getPort());
+      LOG.info("Starting server on port {}", getPort());
       this.server.start();
     }
 
