@@ -41,8 +41,34 @@ public class ServerWithSimpleRouter {
             .get("/ping", HttpHandlers.pong())
             .get("/echo/{message}", ServerWithSimpleRouter::echo)
             .build();
-    HttpServer server = new SunHttpServerCreator(0).create(router);
+    int port = 8888;
+    HttpServer server = new SunHttpServerCreator(port).create(router);
     server.start();
+    
+     HttpHandler client = new JdkClient();
+     HttpResponse response =
+     client.handle(HttpRequest.get((String.format("http://localhost:%s/ping", port))));
+  }
+}
+```
+
+There is even an in-memory transport to make testing simple
+
+```java
+public class InMemoryServerWithSimpleRouter {
+  public static void main(String[] args) {
+    Router router =
+        Router.builder()
+            .get("/ping", HttpHandlers.pong())
+            .get("/echo/{message}", ServerWithSimpleRouter::echo)
+            .build();
+    InMemoryServer server = new InMemoryServerCreator().create(router);
+    server.start();
+    
+     //the same functional interface, however goes directly to the handler
+     //without the underlying HTTP transport layer
+     HttpHandler client = server.getClient();
+     HttpResponse response = client.handle(HttpRequest.get("http://localhost:%s/ping"));
   }
 }
 ```
