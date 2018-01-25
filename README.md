@@ -64,10 +64,10 @@ public class InMemoryServerWithSimpleRouter {
     InMemoryServer server = new InMemoryServerCreator().create(router);
     server.start();
     
-     //the same functional interface, however goes directly to the handler
-     //without the underlying HTTP transport layer
-     HttpHandler client = server.getClient();
-     HttpResponse response = client.handle(HttpRequest.get("http://localhost:%s/ping"));
+    //the same functional interface, however goes directly to the handler
+    //without the underlying HTTP transport layer
+    HttpHandler client = server.getClient();
+    HttpResponse response = client.handle(HttpRequest.get("http://localhost:%s/ping"));
   }
 }
 ```
