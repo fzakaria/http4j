@@ -45,9 +45,8 @@ public class ServerWithSimpleRouter {
     HttpServer server = new SunHttpServerCreator(port).create(router);
     server.start();
     
-     HttpHandler client = new JdkClient();
-     HttpResponse response =
-     client.handle(HttpRequest.get((String.format("http://localhost:%s/ping", port))));
+    HttpHandler client = new JdkClient();
+    HttpResponse response = client.handle(HttpRequest.get((String.format("http://localhost:%s/ping", port))));
   }
 }
 ```
