@@ -42,7 +42,7 @@ public class InMemoryServerCreator implements HttpServerCreator {
   }
 
   @Override
-  public HttpServer create(HttpHandler handler) {
+  public InMemoryServer create(HttpHandler handler) {
     return new InMemoryServer(handler);
   }
 }

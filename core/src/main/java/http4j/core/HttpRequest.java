@@ -1,8 +1,11 @@
 package http4j.core;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import http4j.core.util.CaseInsensitiveMap;
+
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -40,6 +43,28 @@ public class HttpRequest extends HttpMessage {
     this.uri = uri;
     this.remote = remote;
     this.params = CaseInsensitiveMap.create(params);
+  }
+
+  public static HttpRequest create(HttpMethod method, String url) {
+    return new HttpRequest(
+            method,
+            new ByteArrayInputStream(new byte[0]),
+            0,
+            ArrayListMultimap.create(),
+            URI.create(url),
+            null,
+            Collections.emptyMap());
+  }
+
+  public static HttpRequest get(String url) {
+    return new HttpRequest(
+            HttpMethod.GET,
+            new ByteArrayInputStream(new byte[0]),
+            0,
+            ArrayListMultimap.create(),
+            URI.create(url),
+            null,
+            Collections.emptyMap());
   }
 
   /** Get the request method */
