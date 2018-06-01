@@ -5,7 +5,7 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
-import com.google.common.primitives.Ints;
+import com.google.common.primitives.Longs;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import http4j.core.HttpHandler;
@@ -69,6 +69,10 @@ public final class SunHttpServerCreator implements HttpServerCreator {
                   (t, e) -> LOG.error("Uncaught unexception for {}", t.getName(), e))
               .build());
 
+  /**
+   * Factory for a {@link SunHttpServer}
+   * @param port the port to open when {@link #create(HttpHandler)} is called. 0 will find any random port.
+   */
   public SunHttpServerCreator(int port) {
     this(port, DEFAULT_EXECUTOR);
   }
@@ -145,10 +149,15 @@ public final class SunHttpServerCreator implements HttpServerCreator {
     }
 
     HttpMethod method = HttpMethod.method(exchange.getRequestMethod());
-    int length =
-        Optional.ofNullable(exchange.getRequestHeaders().getFirst(HttpHeaders.CONTENT_LENGTH))
-            .map(Ints::tryParse)
-            .orElse(0);
+    final Long length;
+    if (isChunkedTransferEncoding(exchange)) {
+      length = null;
+    } else {
+      length =
+          Optional.ofNullable(exchange.getRequestHeaders().getFirst(HttpHeaders.CONTENT_LENGTH))
+              .map(Longs::tryParse)
+              .orElse(0L);
+    }
 
     return new HttpRequest(
         method,

@@ -22,8 +22,10 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public class HttpRequest extends HttpMessage {
 
+  private static final InputStream EMPTY_BODY = new ByteArrayInputStream(new byte[0]);
+
   private final InputStream body;
-  private final long length;
+  private final Long length;
   private final HttpMethod method;
   private final URI uri;
   private final InetSocketAddress remote;
@@ -32,7 +34,7 @@ public class HttpRequest extends HttpMessage {
   public HttpRequest(
       HttpMethod method,
       InputStream body,
-      @Nullable long length,
+      @Nullable Long length,
       Multimap<String, String> headers,
       URI uri,
       InetSocketAddress remote,
@@ -49,8 +51,8 @@ public class HttpRequest extends HttpMessage {
   public static HttpRequest create(HttpMethod method, String url) {
     return new HttpRequest(
         method,
-        new ByteArrayInputStream(new byte[0]),
-        0,
+        EMPTY_BODY,
+        0L,
         ArrayListMultimap.create(),
         URI.create(url),
         null,
@@ -60,8 +62,8 @@ public class HttpRequest extends HttpMessage {
   public static HttpRequest get(String url) {
     return new HttpRequest(
         HttpMethod.GET,
-        new ByteArrayInputStream(new byte[0]),
-        0,
+        EMPTY_BODY,
+        0L,
         ArrayListMultimap.create(),
         URI.create(url),
         null,
@@ -116,7 +118,7 @@ public class HttpRequest extends HttpMessage {
   public static class CopyBuilder {
 
     private InputStream body;
-    private final Optional<Long> length;
+    private final Long length;
     private final Multimap<String, String> headers;
     private final URI uri;
     private final HttpMethod method;
@@ -125,7 +127,7 @@ public class HttpRequest extends HttpMessage {
 
     public CopyBuilder(HttpRequest request) {
       this.body = request.body();
-      this.length = request.length();
+      this.length = request.length().orElse(null);
       this.method = request.method();
       this.headers = LinkedListMultimap.create(request.headers());
       this.uri = request.uri();
@@ -144,7 +146,7 @@ public class HttpRequest extends HttpMessage {
     }
 
     public HttpRequest build() {
-      return new HttpRequest(method, body, length.orElse(null), headers, uri, remote, params);
+      return new HttpRequest(method, body, length, headers, uri, remote, params);
     }
   }
 }

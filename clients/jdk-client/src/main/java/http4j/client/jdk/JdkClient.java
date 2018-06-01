@@ -7,7 +7,6 @@ import http4j.core.HttpRequest;
 import http4j.core.HttpResponse;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 
@@ -31,9 +30,7 @@ public class JdkClient implements HttpHandler {
         jdkRequest.send(request.body());
       }
 
-      //copy the body
-      final ByteBuffer body;
-      int length = jdkRequest.contentLength();
+      long length = jdkRequest.contentLength();
 
       Multimap<String, String> headers = ArrayListMultimap.create();
       for (Map.Entry<String, List<String>> entry : jdkRequest.headers().entrySet()) {

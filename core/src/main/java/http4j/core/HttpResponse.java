@@ -21,11 +21,11 @@ public final class HttpResponse extends HttpMessage {
   private static final InputStream EMPTY_BODY = new ByteArrayInputStream(new byte[0]);
 
   private final InputStream body;
-  private final long length;
+  private final Long length;
   private final int status;
 
   public HttpResponse(
-      int status, InputStream body, @Nullable long length, Multimap<String, String> headers) {
+      int status, InputStream body, @Nullable Long length, Multimap<String, String> headers) {
     super(headers);
     this.body = body;
     this.length = length;
@@ -38,7 +38,7 @@ public final class HttpResponse extends HttpMessage {
    * @param status the http status code to initialize the response with
    */
   public static HttpResponse status(int status) {
-    return new HttpResponse(status, EMPTY_BODY, 0, LinkedListMultimap.create());
+    return new HttpResponse(status, EMPTY_BODY, 0L, LinkedListMultimap.create());
   }
 
   /** the http status code to return */
@@ -58,8 +58,6 @@ public final class HttpResponse extends HttpMessage {
   /**
    * In order to wrap the body for downstream handling in filters/middleware, its returned here as
    * an inputstream.
-   *
-   * @return
    */
   public InputStream body() {
     return body;
@@ -87,7 +85,7 @@ public final class HttpResponse extends HttpMessage {
 
   public static class CopyBuilder {
 
-    private long length;
+    private Long length;
     private InputStream body;
     private int status;
 
