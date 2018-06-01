@@ -2,9 +2,6 @@
 
 http4j is an HTTP toolkit written in Java8 that allows for functional HTTP services -- in similar vein to [http4k](https://github.com/http4k/http4k) however geared for Java codebases.
 
-In order to achieve simplicity in the abstractions & scope of the toolkit, certain restrictions to the HTTP spec have been chosen:
-1. No Chunked Transfer Encoding -- every request & response must have a content-length
-2. No Streaming -- the payloads are stored as byte arrays
 
 ## Functional
 http4j follows Twitter's [Your Server as a Function](https://monkey.org/~marius/funsrv.pdf) whitepaper, and handlers are simple functional interfaces. To get started in http4j all you need to know the following two interfaces.
