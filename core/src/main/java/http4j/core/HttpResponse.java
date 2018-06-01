@@ -6,6 +6,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
 /**
@@ -16,12 +18,17 @@ import javax.annotation.concurrent.Immutable;
 @Immutable
 public final class HttpResponse extends HttpMessage {
 
-  private final ByteBuffer buffer;
+  private static final InputStream EMPTY_BODY = new ByteArrayInputStream(new byte[0]);
+
+  private final InputStream body;
+  private final long length;
   private final int status;
 
-  public HttpResponse(int status, ByteBuffer buffer, Multimap<String, String> headers) {
+  public HttpResponse(
+      int status, InputStream body, @Nullable long length, Multimap<String, String> headers) {
     super(headers);
-    this.buffer = buffer;
+    this.body = body;
+    this.length = length;
     this.status = status;
   }
 
@@ -31,7 +38,7 @@ public final class HttpResponse extends HttpMessage {
    * @param status the http status code to initialize the response with
    */
   public static HttpResponse status(int status) {
-    return new HttpResponse(status, ByteBuffer.allocate(0), LinkedListMultimap.create());
+    return new HttpResponse(status, EMPTY_BODY, 0, LinkedListMultimap.create());
   }
 
   /** the http status code to return */
@@ -39,10 +46,13 @@ public final class HttpResponse extends HttpMessage {
     return status;
   }
 
-  /** the current size of the body. this will turn into the value placed for content-length. */
+  /**
+   * the current size of the body. this will turn into the value placed for content-length. if not
+   * present, then the message will be Chunked-Transfer
+   */
   @Override
-  public int length() {
-    return buffer.array().length;
+  public Optional<Long> length() {
+    return Optional.ofNullable(length);
   }
 
   /**
@@ -52,7 +62,7 @@ public final class HttpResponse extends HttpMessage {
    * @return
    */
   public InputStream body() {
-    return new ByteArrayInputStream(buffer.array());
+    return body;
   }
 
   /**
@@ -64,11 +74,11 @@ public final class HttpResponse extends HttpMessage {
   }
 
   public HttpResponse body(String body) {
-    return body(ByteBuffer.wrap(body.getBytes(StandardCharsets.UTF_8)));
+    return copy().body(body).build();
   }
 
-  public HttpResponse body(ByteBuffer body) {
-    return copy().body(body).build();
+  public HttpResponse body(InputStream body, @Nullable Long length) {
+    return copy().body(body, length).build();
   }
 
   public HttpResponse header(String key, String value) {
@@ -77,13 +87,14 @@ public final class HttpResponse extends HttpMessage {
 
   public static class CopyBuilder {
 
-    private ByteBuffer buffer;
+    private long length;
+    private InputStream body;
     private int status;
 
     private final Multimap<String, String> headers;
 
     public CopyBuilder(HttpResponse response) {
-      this.buffer = response.buffer;
+      this.body = response.body;
       this.status = response.status;
       this.headers = LinkedListMultimap.create(response.headers());
     }
@@ -93,13 +104,16 @@ public final class HttpResponse extends HttpMessage {
       return this;
     }
 
-    public CopyBuilder body(ByteBuffer body) {
-      this.buffer = body;
+    public CopyBuilder body(InputStream body, @Nullable Long length) {
+      this.body = body;
+      this.length = length;
       return this;
     }
 
     public CopyBuilder body(String body) {
-      return body(ByteBuffer.wrap(body.getBytes(StandardCharsets.UTF_8)));
+      byte[] rawBody = body.getBytes(StandardCharsets.UTF_8);
+      return body(
+          new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)), (long) rawBody.length);
     }
 
     public CopyBuilder header(String key, String value) {
@@ -108,7 +122,7 @@ public final class HttpResponse extends HttpMessage {
     }
 
     public HttpResponse build() {
-      return new HttpResponse(status, buffer, headers);
+      return new HttpResponse(status, body, length, headers);
     }
   }
 }

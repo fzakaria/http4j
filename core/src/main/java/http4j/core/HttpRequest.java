@@ -4,7 +4,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import http4j.core.util.CaseInsensitiveMap;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
@@ -12,6 +11,8 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
 /**
@@ -22,7 +23,7 @@ import javax.annotation.concurrent.Immutable;
 public class HttpRequest extends HttpMessage {
 
   private final InputStream body;
-  private final int length;
+  private final long length;
   private final HttpMethod method;
   private final URI uri;
   private final InetSocketAddress remote;
@@ -31,7 +32,7 @@ public class HttpRequest extends HttpMessage {
   public HttpRequest(
       HttpMethod method,
       InputStream body,
-      int length,
+      @Nullable long length,
       Multimap<String, String> headers,
       URI uri,
       InetSocketAddress remote,
@@ -47,24 +48,24 @@ public class HttpRequest extends HttpMessage {
 
   public static HttpRequest create(HttpMethod method, String url) {
     return new HttpRequest(
-            method,
-            new ByteArrayInputStream(new byte[0]),
-            0,
-            ArrayListMultimap.create(),
-            URI.create(url),
-            null,
-            Collections.emptyMap());
+        method,
+        new ByteArrayInputStream(new byte[0]),
+        0,
+        ArrayListMultimap.create(),
+        URI.create(url),
+        null,
+        Collections.emptyMap());
   }
 
   public static HttpRequest get(String url) {
     return new HttpRequest(
-            HttpMethod.GET,
-            new ByteArrayInputStream(new byte[0]),
-            0,
-            ArrayListMultimap.create(),
-            URI.create(url),
-            null,
-            Collections.emptyMap());
+        HttpMethod.GET,
+        new ByteArrayInputStream(new byte[0]),
+        0,
+        ArrayListMultimap.create(),
+        URI.create(url),
+        null,
+        Collections.emptyMap());
   }
 
   /** Get the request method */
@@ -78,8 +79,8 @@ public class HttpRequest extends HttpMessage {
   }
 
   @Override
-  public int length() {
-    return length;
+  public Optional<Long> length() {
+    return Optional.ofNullable(length);
   }
 
   /** Get the request URI */
@@ -115,7 +116,7 @@ public class HttpRequest extends HttpMessage {
   public static class CopyBuilder {
 
     private InputStream body;
-    private final int length;
+    private final Optional<Long> length;
     private final Multimap<String, String> headers;
     private final URI uri;
     private final HttpMethod method;
@@ -143,7 +144,7 @@ public class HttpRequest extends HttpMessage {
     }
 
     public HttpRequest build() {
-      return new HttpRequest(method, body, length, headers, uri, remote, params);
+      return new HttpRequest(method, body, length.orElse(null), headers, uri, remote, params);
     }
   }
 }

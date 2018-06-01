@@ -16,7 +16,6 @@ import http4j.core.HttpServer;
 import http4j.core.HttpServerCreator;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
@@ -88,12 +87,6 @@ public final class SunHttpServerCreator implements HttpServerCreator {
     server.createContext(
         "/",
         httpExchange -> {
-          if (isChunkedTransferEncoding(httpExchange)) {
-            LOG.trace("http4j only accepts http requests with content length.");
-            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_LENGTH_REQUIRED, -1);
-            return;
-          }
-
           try {
             HttpResponse response = handler.handle(convert(httpExchange));
             //Take the response and use it
@@ -104,7 +97,22 @@ public final class SunHttpServerCreator implements HttpServerCreator {
                     entry -> {
                       httpExchange.getResponseHeaders().add(entry.getKey(), entry.getValue());
                     });
-            httpExchange.sendResponseHeaders(response.status(), response.length());
+
+            //If the content length is zero, HttpExchange expects -1
+            //a value of 0 for HttpExchange indicates chunked transfer
+            final long contentLength;
+            if (response.length().isPresent()) {
+              long responseLength = response.length().get();
+              if (responseLength == 0) {
+                contentLength = -1;
+              } else {
+                contentLength = responseLength;
+              }
+            } else {
+              contentLength = 0;
+            }
+
+            httpExchange.sendResponseHeaders(response.status(), contentLength);
             ByteStreams.copy(response.body(), httpExchange.getResponseBody());
           } catch (Throwable t) {
             LOG.error("Uncaught error thrown.", t);

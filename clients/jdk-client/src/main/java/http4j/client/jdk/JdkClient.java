@@ -2,11 +2,9 @@ package http4j.client.jdk;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.io.ByteStreams;
 import http4j.core.HttpHandler;
 import http4j.core.HttpRequest;
 import http4j.core.HttpResponse;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
@@ -29,7 +27,7 @@ public class JdkClient implements HttpHandler {
         jdkRequest.header(header.getKey(), header.getValue());
       }
 
-      if (request.length() > 0) {
+      if (request.length().orElse(0L) > 0) {
         jdkRequest.send(request.body());
       }
 
@@ -37,19 +35,11 @@ public class JdkClient implements HttpHandler {
       final ByteBuffer body;
       int length = jdkRequest.contentLength();
 
-      if (length <= 0) {
-        body = ByteBuffer.allocate(0);
-      } else {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(length);
-        ByteStreams.copy(jdkRequest.stream(), baos);
-        body = ByteBuffer.wrap(baos.toByteArray());
-      }
-
       Multimap<String, String> headers = ArrayListMultimap.create();
       for (Map.Entry<String, List<String>> entry : jdkRequest.headers().entrySet()) {
         headers.putAll(entry.getKey(), entry.getValue());
       }
-      return new HttpResponse(jdkRequest.code(), body, headers);
+      return new HttpResponse(jdkRequest.code(), jdkRequest.stream(), length, headers);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }

@@ -1,15 +1,12 @@
 package http4j.core;
 
-import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.zip.GZIPOutputStream;
+import java.util.zip.GZIPInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,14 +56,9 @@ public final class HttpFilters {
     return (request) -> {
       HttpResponse response = handler.handle(request);
       try {
-        ByteArrayOutputStream baOs = new ByteArrayOutputStream();
-        GZIPOutputStream gzipOs = new GZIPOutputStream(baOs);
-        ByteStreams.copy(response.body(), gzipOs);
-        gzipOs.close(); //important to finish the trailing bytes
-
         return response
             .header(HttpHeaders.CONTENT_ENCODING, "gzip")
-            .body(ByteBuffer.wrap(baOs.toByteArray()));
+            .body(new GZIPInputStream(response.body()), null);
       } catch (IOException e) {
         throw new UncheckedIOException(e);
       }

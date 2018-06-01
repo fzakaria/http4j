@@ -3,6 +3,7 @@ package http4j.core;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import http4j.core.util.CaseInsensitiveMultimap;
+import java.util.Optional;
 
 public abstract class HttpMessage {
 
@@ -27,5 +28,5 @@ public abstract class HttpMessage {
    *
    * @return the length in bytes
    */
-  public abstract int length();
+  public abstract Optional<Long> length();
 }
