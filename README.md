@@ -1,3 +1,5 @@
+_seeking others to work with on the project_
+
 # http4j
 
 http4j is an HTTP toolkit written in Java8 that allows for functional HTTP services -- in similar vein to [http4k](https://github.com/http4k/http4k) however geared for Java codebases.
